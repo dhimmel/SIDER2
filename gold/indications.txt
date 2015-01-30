@@ -1,0 +1,102 @@
+pubchem_cid	concept_id	concept_name	type	category_manual
+62819	C0021359	infertility	indication	1
+36811	C0004238	atrial fibrillation	indication	0
+3086257	C0011168	dysphagia	indication	1
+29029	C0001144	acne vulgaris	indication	1
+53232	C0858310	normal triglyceride	indication	0
+5825	C0677850	adjunctive treatment	indication	0
+6602291	C0021311	infection	indication	1
+38904	C0302592	Cervical cancer	indication	1
+4829	C0015672	fatigue	indication	0
+156391	C0001792	geriatric	indication	0
+1978	C0018799	heart disease	indication	0
+149096	C0006277	bronchitis	indication	1
+5281034	C0178416	hypoplastic anemia	indication	1
+8549	C0023218	leg cramps	indication	1
+6010	C0029191	orchitis	indication	1
+439693	C0023443	Hairy Cell Leukemia	indication	1
+36462	C0007097	carcinoma	indication	1
+222786	C0033687	proteinuria	indication	1
+5281021	C0016977	gallbladder disease	indication	1
+5755	C0004096	asthma	indication	1
+5281011	C0027794	neural tube defects	indication	0
+5311412	C0021368	inflammation	indication	1
+41867	C0038354	stomach	indication	1
+149096	C0155862	pneumonia due to Streptococcus	indication	1
+2564	C0009763	conjunctivitis	indication	1
+3793	C0239295	esophageal candidiasis	indication	1
+5743	C0009763	conjunctivitis	indication	0
+5280754	C0027721	minimal change nephropathy	indication	0
+1548952	C0021359	infertility	indication	1
+5742673	C0021311	infection	indication	1
+18283	C0242656	progression	indication	0
+31100	C0559546	ADVERSE REACTIONS	indication	0
+64142	C0021311	infection	indication	1
+4421	C0042029	urinary tract infection	indication	1
+5865	C0687702	remission	indication	0
+2802	C0001818	agoraphobia	indication	0
+4168	C0027498	nausea and vomiting	indication	1
+5282241	C0006277	bronchitis	indication	1
+2369	C0028840	ocular hypertension	indication	1
+468595	C0026946	fungal infection	indication	1
+312	C0023890	cirrhosis	indication	0
+5324345	C0005587	bipolar depression	indication	0
+5755	C0038013	ankylosing spondylitis	indication	1
+5281021	C0025289	meningitis	indication	0
+3639	C0235437	dependent edema	indication	1
+54454	C0010068	coronary heart disease	indication	0
+150610	C0555973	foot infections	indication	1
+5815	C0221423	sickness	indication	0
+4064	C0003467	anxiety	indication	1
+6741	C0034902	pure red cell aplasia	indication	1
+222786	C0032285	pneumonia	indication	1
+28417	C0016034	fibrocystic breast	indication	1
+5284583	C0033046	pms	indication	0
+6741	C0041834	erythema	indication	1
+5878	C0687133	Interactions	indication	0
+4673	C0153690	bone metastases	indication	1
+271	C0013395	dyspepsia	indication	0
+383413	C0040100	thymoma	indication	1
+3366	C0021311	infection	indication	1
+30323	C0023449	acute lymphoblastic leukemia	indication	1
+3305	C0029401	osteitis deformans	indication	1
+4659569	C0424092	withdrawn	indication	0
+4173	C0014130	Endocrine Disorders	indication	0
+12560	C0002438	amebiasis	indication	1
+4946	C0080203	tachyarrhythmias	indication	1
+271	C0037274	skin disorder	indication	1
+12560	C2931317	primary syphilis	indication	1
+3032	C0022602	actinic keratoses	indication	1
+5280754	C0018133	GVHD	indication	1
+2140	C0019880	homocystinuria	indication	0
+39186	C0004239	atrial flutter	indication	1
+2770	C0302592	Cervical cancer	indication	1
+5282451	C0020473	hyperlipidemia	indication	1
+5510	C0040252	tinea corporis	indication	1
+4991	C0947912	myasthenia	indication	1
+27447	C0033581	prostatitis	indication	1
+63009	C0233477	dysphoria	indication	0
+168708	C0007222	cardiovascular disease	indication	0
+4449	C0011581	depressive disorder	indication	1
+2435	C0234708	increased intraocular pressure	indication	1
+12560	C0040425	tonsillitis	indication	1
+6322	C0013336	dwarfism	indication	0
+71368	C0549473	thyroid cancer	indication	1
+5755	C0027726	nephrotic syndrome	indication	1
+4911	C0740394	hyperuricemia	indication	1
+392622	C1306577	death	indication	0
+383413	C0030554	paresthesia	indication	0
+444795	C0037286	skin neoplasm	indication	0
+6041	C0020517	hypersensitivity	indication	0
+6741	C0002792	anaphylaxis	indication	1
+4189	C0085166	bacterial vaginosis	indication	1
+5852	C0268070	low copper	indication	0
+1983	C0003864	arthritis	indication	0
+56338	C0162557	acute liver failure	indication	0
+657180	C0376358	prostate cancer	indication	1
+5281006	C0010692	cystitis	indication	1
+5280965	C0006852	vaginal moniliasis	indication	1
+10631	C0016382	flushing	indication	0
+5819	C0006826	cancer	indication	1
+5280453	C0029405	osteitis fibrosa cystica	indication	0
+5362118	C0001792	geriatric	indication	0

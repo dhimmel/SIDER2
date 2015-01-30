@@ -1,0 +1,101 @@
+pubchem_cid	concept_id	concept_name	type	category_manual
+5090	C0030252	palpitations	side_effect	1
+216326	C0232462	decreased appetite	side_effect	1
+4212	C0344232	blurred vision	side_effect	1
+16132441	C0040053	thrombosis	side_effect	1
+5487	C0020651	postural hypotension	side_effect	1
+1775	C0086565	abnormal liver function	side_effect	1
+5281021	C0030193	pain	side_effect	1
+150610	C0016204	flatulence	side_effect	1
+26757	C0151766	liver function tests abnormal	side_effect	1
+60834	C0031542	phlebitis	side_effect	1
+5288826	C0015734	fecal impaction	side_effect	1
+60606	C0740471	abnormal creatinine	side_effect	1
+156391	C0152009	abnormal WBC	side_effect	1
+443872	C0015230	rash	side_effect	1
+145068	C0025637	methemoglobinemia	side_effect	1
+134018	C0023518	leukocytosis	side_effect	1
+5284592	C0020517	hypersensitivity	side_effect	1
+101526	C0012833	dizziness	side_effect	1
+5572	C1258215	ileus	side_effect	1
+119182	C0151578	creatinine increased	side_effect	1
+21585658	C1306577	death	side_effect	0
+9571107	C0030252	palpitations	side_effect	1
+5288826	C0004096	asthma	side_effect	1
+4062	C0027497	nausea	side_effect	1
+5281099	C0423602	foreign body sensation	side_effect	1
+3152	C0004144	atelectasis	side_effect	1
+3902	C0023380	lethargy	side_effect	1
+5360126	C0020538	hypertension	side_effect	1
+6335986	C0018802	congestive heart failure	side_effect	1
+176870	C0007097	carcinoma	side_effect	0
+5282044	C0017168	gastroesophageal reflux	side_effect	1
+25077179	C0231528	myalgia	side_effect	1
+29029	C1510431	thrombophlebitis superficial	side_effect	1
+5755	C0234708	increased intraocular pressure	side_effect	1
+5656	C0151689	hair discoloration	side_effect	1
+60795	C0002884	hypochromic anemia	side_effect	1
+5486971	C0013384	dyskinesia	side_effect	1
+2719	C0028077	night blindness	side_effect	1
+5865	C0021308	infarction	side_effect	0
+3948	C0338831	manic	side_effect	1
+5073	C1260880	rhinorrhea	side_effect	1
+3156	C0033774	pruritus	side_effect	1
+34312	C0085636	photophobia	side_effect	1
+3899	C0042963	vomiting	side_effect	1
+2140	C0233715	speech disturbance	side_effect	1
+443958	C0034212	pyoderma	side_effect	1
+3902	C0853662	estrogen deficiency	side_effect	0
+5002	C0085614	first degree AV block	side_effect	1
+444	C0152517	gastroenteritis viral	side_effect	1
+43815	C0019360	herpes zoster	side_effect	1
+83898	C0553713	female breast pain	side_effect	1
+5734	C0043352	dry mouth	side_effect	1
+5734	C0423791	maculopapular rash	side_effect	1
+60846	C0035410	rhabdomyolysis	side_effect	1
+63009	C0025323	menorrhagia	side_effect	1
+5212	C0155305	ischemic optic neuropathy	side_effect	1
+5324345	C0040034	thrombocytopenia	side_effect	1
+6335986	C0011991	diarrhea	side_effect	1
+4679	C0007222	cardiovascular disease	side_effect	1
+5362129	C0018681	headache	side_effect	1
+468595	C0030305	pancreatitis	side_effect	1
+1935	C0231218	malaise	side_effect	1
+60606	C0020517	hypersensitivity	side_effect	1
+3081884	C0003537	aphasia	side_effect	1
+451668	C0021368	inflammation	side_effect	1
+2092	C0015672	fatigue	side_effect	1
+4870	C0017979	glycosuria	side_effect	1
+4585	C0026205	miosis	side_effect	1
+2519	C0520459	necrotizing enterocolitis	side_effect	1
+82153	C1291736	aftertaste	side_effect	1
+3749	C0033575	prostate	side_effect	0
+5360126	C0151798	hepatic necrosis	side_effect	1
+3161	C0034150	purpura	side_effect	1
+60753	C0038454	cerebrovascular accident	side_effect	1
+119569	C2607914	allergic rhinitis	side_effect	1
+2662	C0004936	Psychiatric Disorders	side_effect	1
+5361917	C0027497	nausea	side_effect	1
+460612	C0010200	cough	side_effect	0
+259331	C0700361	upset	side_effect	1
+3510	C0016204	flatulence	side_effect	1
+8549	C0151636	ventricular extrasystoles	side_effect	1
+667477	C0042373	vascular disease	side_effect	0
+126941	C0009763	conjunctivitis	side_effect	1
+4723	C0018524	hallucinations	side_effect	1
+60857	C0032285	pneumonia	side_effect	1
+445643	C0003123	anorexia	side_effect	1
+5909	C0003537	aphasia	side_effect	1
+4659569	C0026946	fungal infection	side_effect	1
+4449	C0040264	tinnitus	side_effect	1
+4932	C0239429	eye inflammation	side_effect	1
+5656	C0040147	thyroiditis	side_effect	1
+449171	C0030554	paresthesia	side_effect	1
+5833	C0027497	nausea	side_effect	1
+3345	C0151723	hypomagnesemia	side_effect	1
+5625	C2830004	somnolence	side_effect	1
+5284616	C0013395	dyspepsia	side_effect	0
+5362420	C0423153	lacrimation	side_effect	1
+667477	C0030193	pain	side_effect	1
+4112	C0031039	pericardial effusion	side_effect	1
+83898	C0040034	thrombocytopenia	side_effect	1

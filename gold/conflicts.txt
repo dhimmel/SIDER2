@@ -1,0 +1,131 @@
+pubchem_cid	concept_id	name	category_manual	category_sider_online
+107807	C0085580	essential hypertension	indication	indication
+12560	C0021400	flu	indication	indication
+9444	C0040034	thrombocytopenia	side_effect	indication
+84029	C0021311	infection	indication	side_effect
+3715	C0234233	tenderness	indication	indication
+5359476	C0042963	vomiting	side_effect	indication
+2720	C0151614	electrolyte depletion	side_effect	indication
+153941	C0021311	infection	indication	indication
+5426	C0232910	teratogenicity	side_effect	indication
+222786	C0011603	dermatitis	indication	indication
+168708	C0006142	breast cancer	side_effect	indication
+5566	C0686347	tardive dyskinesia	side_effect	indication
+9782	C0011603	dermatitis	indication	indication
+5281011	C0034152	anaphylactoid purpura	side_effect	side_effect
+174174	C0085628	stupor	indication	indication
+3365	C0042267	vaginitis	indication	indication
+5280453	C0020626	hypoparathyroidism	indication	indication
+3961	C0021308	infarction	indication	indication
+5656	C0030319	panic disorder	indication	indication
+5002	C0235165	acute mania	indication	indication
+4673	C0006142	breast cancer	indication	indication
+29029	C0020517	hypersensitivity	side_effect	indication
+60825	C0023895	liver disease	indication	indication
+441276	C0007097	carcinoma	indication	indication
+16136245	C0006826	cancer	indication	indication
+60871	C0019158	hepatitis	indication	indication
+9642	C0263449	perioral dermatitis	side_effect	side_effect
+636380	C0019080	hemorrhage	side_effect	side_effect
+2802	C0027497	nausea	side_effect	indication
+4205	C0085631	agitation	side_effect	indication
+3715	C0038013	ankylosing spondylitis	indication	indication
+5253	C0002962	angina	indication	indication
+5284537	C0007097	carcinoma	indication	indication
+1549007	C0033774	pruritus	side_effect	indication
+33613	C0013295	duodenal ulcer	indication	indication
+6335986	C0021311	infection	indication	indication
+3676	C0234233	tenderness	indication	indication
+5090	C0149875	primary dysmenorrhea	indication	indication
+2907	C0023418	leukemia	indication	indication
+3345	C1306577	death	side_effect	indication
+2564	C0042109	urticaria	indication	indication
+3715	C0003873	rheumatoid arthritis	indication	indication
+7029	C1328247	abuse	side_effect	side_effect
+5288826	C0013404	dyspnea	indication	indication
+5324345	C0020517	hypersensitivity	side_effect	side_effect
+5754	C0392707	atopic	indication	indication
+667477	C0917801	insomnia	indication	indication
+57469	C0007097	carcinoma	indication	indication
+6474909	C0038463	Strongyloidiasis	indication	indication
+4543	C0027051	myocardial infarction	side_effect	indication
+33613	C0040425	tonsillitis	indication	indication
+2019	C0002871	anemia	side_effect	indication
+4634	C0043352	dry mouth	side_effect	side_effect
+5320	C0001144	acne vulgaris	indication	indication
+338	C0700361	upset	side_effect	
+5281011	C0014356	enterocolitis	side_effect	side_effect
+3746	C0848309	perennial rhinitis	indication	indication
+4725	C0019345	Cold Sores	indication	indication
+5329102	C0278678	metastatic renal cell carcinoma	indication	indication
+5755	C0751438	posterior	side_effect	
+44093	C0011881	diabetic nephropathy	indication	indication
+31703	C0020649	hypotension	side_effect	
+9875401	C0038454	cerebrovascular accident	indication	indication
+5288826	C0003467	anxiety	side_effect	indication
+31703	C0033774	pruritus	side_effect	side_effect
+4946	C0027651	tumor	indication	indication
+16132283	C0031511	pheochromocytoma	side_effect	side_effect
+3672	C0026821	cramps	indication	indication
+31100	C0020514	hyperprolactinemia	indication	indication
+441335	C0035457	perennial allergic rhinitis	indication	indication
+104865	C0152171	PAH	indication	indication
+5281075	C0019080	hemorrhage	indication	indication
+4463	C0015230	rash	side_effect	indication
+56959	C0002962	angina	indication	indication
+3878	C0853193	Bipolar I Disorder	indication	indication
+6238	C0151526	premature birth	indication	indication
+5280453	C0011389	plaque	indication	
+10631	C0019080	hemorrhage	side_effect	indication
+5281011	C0266929	adult periodontitis	indication	indication
+6335986	C0000833	abscess	indication	indication
+43815	C0270549	Generalized Anxiety Disorder	indication	indication
+2764	C0027651	tumor	side_effect	
+4168	C0006826	cancer	side_effect	
+5656	C0038990	sweating	side_effect	indication
+5665	C0037763	spasm	indication	indication
+4594	C0021311	infection	indication	indication
+60779	C0242379	lung cancer	indication	indication
+47725	C0600139	carcinoma of the prostate	indication	indication
+4679	C0038358	gastric ulcer	indication	indication
+5329102	C0027651	tumor	indication	indication
+39042	C0021308	infarction	indication	indication
+3365	C0085436	Cryptococcal meningitis	indication	indication
+62819	C0015914	fertility	indication	indication
+612	C0259817	xerosis	indication	indication
+31401	C0040053	thrombosis	indication	indication
+4927	C0027498	nausea and vomiting	indication	indication
+5329102	C0238198	gastrointestinal stromal tumors	indication	indication
+5253	C0004238	atrial fibrillation	indication	indication
+4171	C0018801	heart failure	indication	indication
+47725	C0027651	tumor	indication	indication
+115237	C0036341	schizophrenia	indication	indication
+64147	C0206178	CMV retinitis	indication	indication
+5656	C0011551	depersonalization	side_effect	indication
+2818	C0036337	schizoaffective disorder	indication	indication
+4634	C0039231	tachycardia	side_effect	indication
+2145	C1621895	adrenal hyperplasia	indication	indication
+5656	C0349231	phobia	indication	indication
+166548	C0014852	esophageal	indication	indication
+5281011	C0027497	nausea	side_effect	side_effect
+5426	C0013922	embolism	side_effect	indication
+3672	C0038354	stomach	side_effect	side_effect
+151075	C0021368	inflammation	indication	indication
+3454	C0027947	neutropenia	side_effect	indication
+5909	C0020538	hypertension	indication	indication
+59768	C0022116	ischemia	indication	indication
+119607	C0003864	arthritis	indication	indication
+3510	C0027497	nausea	indication	indication
+151165	C0027498	nausea and vomiting	indication	indication
+3715	C0038012	spondylitis	indication	indication
+3954	C0011991	diarrhea	indication	indication
+5426	C0040053	thrombosis	side_effect	indication
+148123	C0149925	small cell lung cancer	indication	indication
+3042	C0022104	irritable bowel	indication	indication
+446155	C0020443	hypercholesterolemia	indication	indication
+5281040	C0010200	cough	side_effect	indication
+21585658	C0004610	bacteremia	indication	indication
+3657	C0027022	myeloproliferative disorders	indication	indication
+129228	C0014544	epilepsy	indication	indication
+60846	C0018801	heart failure	indication	indication
+65028	C0021311	infection	indication	indication
