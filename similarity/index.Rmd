@@ -1,0 +1,291 @@
+---
+title: "SIDER 2 Pairwise Similarity"
+author: "Daniel Himmelstein"
+date: "January 30, 2015"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+    includes:
+      in_header: ../include/in_header.html
+      before_body: include/before_body.html
+bibliography: references.bib
+csl: ../cite-styles/plos-mod.csl
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(
+  fig.width=10,
+  fig.path='figures/',
+  warning=FALSE,
+  message=FALSE,
+  fig.retina=2
+)
+```
+
+```{r, include=FALSE}
+# Set up citation management
+library(knitcitations)
+knitcitations::cleanbib()
+knitcitations::cite_options(citation_format = 'pandoc', cite.style = 'authoryear', hyperlink = 'to.bib', super = TRUE)
+```
+
+Here we show how to compute the side effect similarity of two drugs. We will be using a similar technique to a previous study which used side effect similarity to uncover new drug-target relationships `r knitcitations::citep('10.1126/science.1158140')`.
+
+### Load packages
+
+We use [*dplyr*](http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html) and [*reshape2*](http://seananderson.ca/2013/10/19/reshape.html) for data manipulation; [*ggplot2*](http://docs.ggplot2.org/current/) and [*ggdendro*](https://github.com/andrie/ggdendro) for plotting; and [*DT*](https://rstudio.github.io/DT/) for displaying html tables using the Javascript [*DataTables* library](http://www.datatables.net/).
+
+```{r, message=FALSE, warning=FALSE}
+library(reshape2)
+library(dplyr)
+library(ggplot2)
+library(ggdendro)
+library(DT)
+
+options(stringsAsFactors=FALSE)
+doMC::registerDoMC(cores = 6)
+
+write.delim <- function(x, file, sep='\t', quote = FALSE, row.names=FALSE, na = '', ...) {
+  write.table(x = x, file = file, sep=sep, quote=quote, row.names=row.names, na=na, ...)
+}
+```
+
+
+```{r, echo=FALSE}
+# Display as a javascript datatable
+renderPubChem <- DT::JS(
+  "function(data, type, full, meta) {",
+  "return type === 'display' ? ",
+  "'<a href=\"https://pubchem.ncbi.nlm.nih.gov/compound/' + ",
+  "data + '\" target=\"_blank\">' + data + '</a>' : data;}")
+
+DataTable <- function(df, dt.opts = list(), max.rows = 0) {
+  if (max.rows != 0) {
+    df <- df %>% dplyr::filter(row_number() <= max.rows)
+  }
+  DT::datatable(data = df, options = dt.opts)
+}
+
+PubchemDataTable <- function(df, ...) {
+  dt.opts <- list(columnDefs =list(list(targets = which(colnames(df) == 'pubchem_cid') - 1, render = renderPubChem)))
+  DataTable(df, dt.opts = dt.opts, ...)
+}
+```
+
+### Chemical Similarity
+We use PubChem's [score matrix](http://pubchem.ncbi.nlm.nih.gov/score_matrix) service. We use the [2D substructure search](https://pubchem.ncbi.nlm.nih.gov/score_matrix/score_matrix-help.html):
+
+> 2D Similarity: Substructure key-based 2D Tanimoto similarity. Scores are in the range [0 .. 100].
+
+Under `ID List`, select *Upload a file with IDs...* and choose `sider_compounds_pubchem.txt`. Select `Id-Id Score` for output format and `gzip`for compression.
+
+```{r}
+structure.df <- file.path('..', 'data', 'pubchem_score_matrix_2d.tab.gz') %>%
+  read.table(col.names = c('compound_1', 'compound_2', 'substructure')) %>%
+  dplyr::mutate(substructure = substructure / 100) %>%
+  dplyr::filter(compound_1 != compound_2)
+
+```
+
+### Read data
+
+We begin with the processed data from the [SIDER 2 resource](http://sideeffects.embl.de/) `r knitcitations::citep('10.1038/msb.2009.98')`.
+
+```{r}
+sider.df <- file.path('..', 'data', 'sider2-processed.txt') %>% read.delim(na.strings='')
+PubchemDataTable(sider.df, max.rows=200)
+
+# Convert into matrixes
+se.mat <- xtabs(formula = ~ pubchem_cid + concept_id ,
+  data = dplyr::filter(sider.df, type == 'side_effect')) %>% as.matrix()
+ind.mat <- xtabs(formula = ~ pubchem_cid + concept_id ,
+  data = dplyr::filter(sider.df, type == 'indication')) %>% as.matrix()
+```
+
+
+### Compute concept rarity weights
+
+Rarity weighting was performed as [previousely described](http://www.sciencemag.org/content/suppl/2008/07/10/321.5886.263.DC1/Campillos.SOM.pdf) `r knitcitations::citep('10.1126/science.1158140')`:
+
+> Our weighting scheme consists of two parts, a rareness weight and a correlation weight. The recorded side effects vary greatly in abundance: some, like megaloblastic 4 anaemia, occur in only a few package inserts, while others, like dizziness, appear in most. To be able to account for this, we examined the relation between side-effect frequency and the probability of sharing a drug target within a reference set of 502 drugs with 4857 known human drug–target relations (Fig. S1). We observed an inverse correlation between side-effect frequency and the likelihood of two drugs sharing a protein target. Consequently, the rareness weight for a side effect, $r_i$, is defined as the negative logarithm of the side-effect frequency (Fig. S1D). (This frequency refers to the fraction of package inserts that feature a certain side effect, not the relative occurrence of the side effect in patients.)
+
+```{r, fig.height=3, fig.retina=2}
+rarity.se.vec <- -log(colMeans(se.mat))
+rarity.ind.vec <- -log(colMeans(ind.mat))
+
+dplyr::bind_rows(
+  data.frame(rarity=rarity.se.vec, type='side_effect'),
+  data.frame(rarity=rarity.ind.vec, type='indication')) %>%
+  ggplot(aes(x = rarity)) + theme_bw() +
+  facet_grid(. ~ type) +
+  geom_histogram()
+```
+
+### Compute concept underrepresentation weights
+
+Underrepresentation weighting was also performed as [previousely described](http://www.sciencemag.org/content/suppl/2008/07/10/321.5886.263.DC1/Campillos.SOM.pdf) `r knitcitations::citep('10.1126/science.1158140')`, except that Ward's method `r knitcitations::citep('10.2307/2282967')` was used for heirarchical clustering:
+
+> Not all side effects are independent of each other; for example, 90% of drugs that cause nausea also cause vomiting. We correct for this redundancy by weighting side effects in a manner analogous to the down-weighting of similar protein sequences within multiple alignments `r knitcitations::citep('10.1016/0022-2836(94)90012-4')` (Fig. S1C). In order to determine the correlation weight, the correlation of side effects was determined by clustering all side effects according to their assigned drugs using a Tanimoto/Jacquard score to compute a distance matrix: The distance between two ~~drugs~~ [side effects] was calculated by dividing the number of drugs that feature both side effects by the number of drugs that have either side effect associated. The Gerstein–Sonnhammer–Chothia algorithm `r knitcitations::citep('10.1016/0022-2836(94)90012-4')` was used to compute weights based on a hierarch[ic]al clustering with the aforementioned distance matrix `r knitcitations::citep('10.1073/pnas.95.25.14863')`.
+
+```{r, fig.height=4, fig.retina=2}
+# Uniform wieghting until a better scheme is implemented
+underrep.se.vec <- rep(1, ncol(se.mat))
+underrep.ind.vec <- rep(1, ncol(ind.mat))
+
+GitHubScript <- function(...) {
+  # Source a script from GitHub
+  library(RCurl)
+  github.url <- file.path('https://raw.githubusercontent.com', ...)
+  script <- RCurl::getURL(github.url)
+  eval(parse(text = script), envir = .GlobalEnv)
+}
+
+CalcUnderrep <- function(mat) {
+  # Returns underrepresentation weight for each column
+  col.dist <- stats::dist(t(mat), method = 'binary')
+  col.clust <- hclust(col.dist, method = 'ward.D2')
+  col.dendro <- as.dendrogram(col.clust)
+  GitHubScript('antoine-lizee', 'R-GSC', 'master', 'GSC.R')
+  gsc.weight <- GSC(col.dendro)
+  list(dist = col.dist, clust = col.clust, dendro = col.dendro, weight = gsc.weight)
+}
+
+underrep.se <- CalcUnderrep(se.mat)
+underrep.ind <- CalcUnderrep(ind.mat)
+
+ggdendro.se <- ggdendro::dendro_data(underrep.se$clust)
+ggdendro.ind <- ggdendro::dendro_data(underrep.ind$clust)
+
+dendro.df <- dplyr::bind_rows(
+  ggdendro.se %>% ggdendro::segment() %>% dplyr::mutate(type='Side effects'),
+  ggdendro.ind %>% ggdendro::segment() %>% dplyr::mutate(type='Indications'))
+
+leaf.df <- dplyr::bind_rows(
+  ggdendro.se %>% ggdendro::label() %>% dplyr::left_join(
+    y = data.frame(label = names(underrep.se$weight), gsc_weight = underrep.se$weight)) %>% 
+    dplyr::mutate(type='Side effects'),
+  ggdendro.ind %>% ggdendro::label() %>% dplyr::left_join(
+    y = data.frame(label = names(underrep.ind$weight), gsc_weight = underrep.ind$weight)) %>% 
+    dplyr::mutate(type='Indications'))
+
+# plot denogrograms
+dendro.df %>% ggplot(aes(x=x, y=y)) + theme_bw() +
+  facet_grid( ~ type, scales = 'free_x', space = 'free_x') +
+  geom_segment(aes(xend=xend, yend=yend), alpha=0.25) +
+  geom_point(data = leaf.df, aes(color=gsc_weight), alpha=0.04, size=3) +
+  xlab(NULL) + ylab('Distance') +
+  scale_color_gradientn(colours=c('#268bd2', '#dc322f'), name='GSC Weight') +
+  scale_x_continuous(breaks=NULL, expand = c(0.02, 0)) + scale_y_continuous(breaks=NULL, expand = c(0.04, 0))
+```
+
+```{r, fig.height=3, fig.retina=2}
+# plot underrepresentation distributions
+dplyr::bind_rows(
+  data.frame(underrepresentation=underrep.se$weight, type='side_effect'),
+  data.frame(underrepresentation=underrep.ind$weight, type='indication')) %>%
+  ggplot(aes(x = underrepresentation)) + theme_bw() +
+  facet_grid(. ~ type) +
+  geom_histogram()
+```
+
+### Compute Side Effect/Indication Similarity
+
+Next, we compute weighted [Jaccard index](https://en.wikipedia.org/wiki/Jaccard_index) for compound pairs. This number between 0 and 1 measures the similarity between two side effect/indication profiles. 
+
+```{r}
+SiderSimilarity <- function(x1, x2, w) {
+  # Compute the similarity between two boolean vectors
+  # using a weighted jaccard score.
+  sum(w[x1 & x2]) / sum(w[x1 | x2])
+}
+
+GetSimilarityDF <- function(mat, w) {
+  mat %>%
+    proxy::simil(
+      method = SiderSimilarity, w = w,
+      by_rows = TRUE, upper = FALSE, diag = FALSE) %>%
+    as.matrix() %>%
+    reshape2::melt(na.rm = TRUE, value.name = 'similarity', varnames = c('compound_1', 'compound_2')) %>%
+    dplyr::filter(compound_1 != compound_2) %>% # remove self-similarity (for safety, since `diag = FALSE` in proxy::simil)
+    dplyr::distinct(compound_1, compound_2) # proxy::simil returning a non-NA upper half, so duplicate rows exist
+}
+
+similarity.df <- dplyr::full_join(
+  x = GetSimilarityDF(mat = se.mat, w = rarity.se.vec * underrep.se$weight) %>%
+    dplyr::rename(side_effect = similarity),
+  y = GetSimilarityDF(mat = ind.mat, w = rarity.ind.vec * underrep.ind$weight) %>%
+    dplyr::rename(indication = similarity)) %>%
+  dplyr::full_join(y = structure.df) %>%
+  dplyr::arrange(compound_1, compound_2)
+
+gz <- file.path('..', 'data', 'similarities.txt.gz') %>% gzfile('w')
+similarity.df %>% write.delim(gz); close(gz)
+gz <- file.path('..', 'data', 'similarities-complete.txt.gz') %>% gzfile('w')
+similarity.df %>% na.omit() %>% write.delim(gz); close(gz)
+```
+
+Next, we evaluate the distirubtion of compound-compound similarities. Taking the squareroot of similarities provides a zero-inflated but otherwise normal-looking distribution.
+
+```{r, fig.width=9}
+# histogram of similarities
+similarity.df %>%
+  na.omit() %>%
+  reshape2::melt(value.name = 'similarity', variable.name = 'type',
+                 id.vars = c('compound_1', 'compound_2')) %>%
+  ggplot(aes(similarity)) +
+  facet_grid(. ~ type) + 
+  geom_histogram(binwidth=0.02)  +
+  scale_x_sqrt(breaks = seq(0, 1, 0.2)) + scale_y_sqrt() + theme_bw() +
+  xlab('Compound-Compound Similarity')
+```
+
+### Does side effect similarity predict indication similarity?
+
+Next, we evaluate whether compound similarity measured by indications is associated with compound similarity measured by side effects.
+
+```{r}
+# binned frequency plots
+similarity.df %>% na.omit() %>%
+  ggplot(aes(side_effect, indication)) + theme_bw() +
+    stat_bin2d(aes(alpha=..count.., fill=..count..), bins = 75) + 
+    scale_x_sqrt() + scale_y_sqrt() + coord_equal() +
+    scale_fill_gradientn(colours=c('#2aa198', '#6c71c4', '#d33682'), trans='log10', name='Compound Pairs') +
+    scale_alpha_continuous(range = c(0.3, 1), trans='log10', guide=FALSE) +
+    xlab('Side Effect Similarity') + ylab('Indication Similarity')
+
+```
+
+Finally, we fit a linear regression to assess the strength of the association. The association is positive, but has a small effect size. The great significance occurs despite the small effect size since there are close to one million observations.
+
+```{r}
+similarity.df %$% lm(sqrt(indication) ~ sqrt(side_effect)) %>% summary()
+```
+
+### Does structural similarity predict indication or side effect similarity?
+
+```{r}
+similarity.df %>% na.omit() %>%
+  reshape2::melt(value.name = 'similarity', measure.vars=c('indication', 'side_effect'), variable.name = 'type') %>%
+  ggplot(aes(substructure, similarity)) + theme_bw() +
+  facet_grid(. ~ type) + 
+    stat_bin2d(aes(alpha=..count.., fill=..count..), bins = 75) + 
+    scale_x_sqrt() + scale_y_sqrt() + coord_equal() +
+    scale_fill_gradientn(colours=c('#2aa198', '#6c71c4', '#d33682'), trans='log10', name='Compound Pairs') +
+    scale_alpha_continuous(range = c(0.3, 1), trans='log10', guide=FALSE) +
+    xlab('Substructure Similarity') + ylab('SIDER 2 Drug Label Similarity')
+```
+
+```{r}
+# Predict indication similarity using substructure similarity
+similarity.df %$% lm(sqrt(indication) ~ sqrt(substructure)) %>% summary()
+# Predict side effect similarity using substructure similarity
+similarity.df %$% lm(sqrt(side_effect) ~ sqrt(substructure)) %>% summary()
+# Predict indication similarity using substructure and side effect similarity
+similarity.df %$% lm(sqrt(indication) ~ sqrt(substructure) + sqrt(side_effect)) %>% summary()
+```
+
+# References
+```{r, include=FALSE}
+knitcitations::write.bibtex(file = 'references.bib')
+```
