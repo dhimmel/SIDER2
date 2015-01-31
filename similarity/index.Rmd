@@ -68,7 +68,7 @@ DataTable <- function(df, dt.opts = list(), max.rows = 0) {
 }
 
 PubchemDataTable <- function(df, ...) {
-  dt.opts <- list(columnDefs =list(list(targets = which(colnames(df) == 'pubchem_cid') - 1, render = renderPubChem)))
+  dt.opts <- list(columnDefs =list(list(targets = which(colnames(df) %in% c('pubchem_cid', 'compound_1', 'compound_2')) - 1, render = renderPubChem)))
   DataTable(df, dt.opts = dt.opts, ...)
 }
 ```
@@ -94,7 +94,6 @@ We begin with the processed data from the [SIDER 2 resource](http://sideeffects.
 
 ```{r}
 sider.df <- file.path('..', 'data', 'sider2-processed.txt') %>% read.delim(na.strings='')
-PubchemDataTable(sider.df, max.rows=200)
 
 # Convert into matrixes
 se.mat <- xtabs(formula = ~ pubchem_cid + concept_id ,
@@ -222,7 +221,7 @@ similarity.df <- dplyr::full_join(
 gz <- file.path('..', 'data', 'similarities.txt.gz') %>% gzfile('w')
 similarity.df %>% write.delim(gz); close(gz)
 gz <- file.path('..', 'data', 'similarities-complete.txt.gz') %>% gzfile('w')
-similarity.df %>% na.omit() %>% write.delim(gz); close(gz)
+similarity.df %>% na.omit() %T>% PubchemDataTable(max.rows=200) %>% write.delim(gz); close(gz)
 ```
 
 Next, we evaluate the distirubtion of compound-compound similarities. Taking the squareroot of similarities provides a zero-inflated but otherwise normal-looking distribution.
@@ -253,7 +252,6 @@ similarity.df %>% na.omit() %>%
     scale_fill_gradientn(colours=c('#2aa198', '#6c71c4', '#d33682'), trans='log10', name='Compound Pairs') +
     scale_alpha_continuous(range = c(0.3, 1), trans='log10', guide=FALSE) +
     xlab('Side Effect Similarity') + ylab('Indication Similarity')
-
 ```
 
 Finally, we fit a linear regression to assess the strength of the association. The association is positive, but has a small effect size. The great significance occurs despite the small effect size since there are close to one million observations.
