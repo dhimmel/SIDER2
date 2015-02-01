@@ -54,9 +54,10 @@ PubchemDataTable <- function(df, ...) {
 }
 ```
 
-Parsing [SIDER 2](http://sideeffects.embl.de/) `r knitcitations::citep('10.1038/msb.2009.98')` 
+Here, we parse the [SIDER 2](http://sideeffects.embl.de/) database `r knitcitations::citep('10.1038/msb.2009.98')` of side effects and indications. Since the data has been automatically extracted from drug labels, there are quality issues which we aim to address and resolve when possible. We use the term `concept` to refer to either a side effect or indication.
 
-#### Load packages
+### Load packages
+
 We use [*caret*](https://topepo.github.io/caret/index.html) and [*kernlab*](http://cran.r-project.org/web/packages/kernlab/vignettes/kernlab.pdf) for machine learning; [*dplyr*](http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html) for data manipulation; [*ggplot2*](http://docs.ggplot2.org/current/) and [*scales*](https://github.com/hadley/scales) for plotting; [*DT*](https://rstudio.github.io/DT/) for displaying html tables using the Javascript [*DataTables* library](http://www.datatables.net/). For multicore parallel processing, we use the [*doMC*](http://cran.r-project.org/web/packages/doMC/vignettes/gettingstartedMC.pdf) package which is not available on Windows and can be commented out. We make extensive use of [the pipe operator](http://cran.r-project.org/web/packages/magrittr/vignettes/magrittr.html) (`dplyr::%>%`), which passes its lefthand value to the first argument of the righthand expression.
 
 ```{r, message=FALSE, warning=FALSE}
@@ -77,6 +78,7 @@ write.delim <- function(x, file, sep='\t', quote = FALSE, row.names=FALSE, na = 
 ```
 
 ### Read Unprocessed SIDER 2 Data
+
 First, we download SIDER 2 data from their [website](http://sideeffects.embl.de/download/). The three necessary files (`adverse_effects_raw.tsv.gz`, `indications_raw.tsv.gz`, `label_mapping.tsv.gz`) were reteived and and placed the `download/` directory. See the [SIDER 2 download README](http://sideeffects.embl.de/media/download/README) for file documentation. 
 
 ```{r}
@@ -131,6 +133,9 @@ PubchemDataTable(label.df %>% dplyr::select(-stitch_mapping), max.rows=200)
 ```
 
 ### Create a table of all indications and side effects for compounds that mapped to pubchem.
+
+We calculated a variaty of descriptors for each compound-concept pair describing how it appeared in the raw SIDER data.
+
 ```{r}
 
 # Join label-specific side effects and indications to pubchem compounds
@@ -172,12 +177,15 @@ collapsed.df <- pair.df %>%
 
 ```
 
-```{r}
+### Identify conflicting side effects and indications
 
+We assume that if a concept is a side effect for a compound, it cannot also be a side effect and *vice versa*. In other words, if a compound cannot both cause and treat the same concept. Since the drug labels were machine-parsed, there were many examples of a concept being recognized as a side effect and also an indication.
+
+```{r}
 # Find the conflicting side effects and indications:
 # When a compound-concept pair has been extracted
 # as both a side effect and indication.
-overlap.df <- dplyr::intersect(
+conflict.df <- dplyr::intersect(
   dplyr::filter(collapsed.df, type == 'indication') %>%
     dplyr::select(pubchem_cid:total_labels),
   dplyr::filter(collapsed.df, type == 'side_effect') %>%
@@ -190,7 +198,7 @@ ColNameAppend <- function(df, s) {
   dplyr::bind_cols(keep.df, append.df)
 }
 
-overlap.df <- overlap.df %>%
+conflict.df <- conflict.df %>%
   dplyr::inner_join(
     dplyr::filter(collapsed.df, type == 'indication') %>% ColNameAppend(s = 'ind')) %>%
   dplyr::inner_join(
@@ -206,15 +214,18 @@ overlap.df <- overlap.df %>%
     dplyr::summarize(compound_n_ind = sum(type == 'indication'),
                      compound_n_se = sum(type == 'side_effect')))
 ```
-Overall, `r #nrow(overlap.df)` compound-concept pairs overlapped -- were extacted as both a side effect and indication.
+
+### Manually create a conflict gold standard
+
+Overall, `r #nrow(conflict.df)` compound-concept pairs conflicted -- extacted as both a side effect and indication. We manually classified a random subset of the conflicts as either side effects or indications. Based on our high-confidence manual classification -- called a gold standard -- we looked whether our descriptors could potentially be used to resolve conflicts.
 
 ```{r, fig.height=3.5, fig.cap='Pairs extracted as both an indication and side effect'}
-overlap.gold.df <- file.path('..', 'gold', 'conflicts.txt') %>% 
+conflict.gold.df <- file.path('..', 'gold', 'conflicts.txt') %>% 
   read.delim(na.strings = '', colClasses=c(category_manual='factor')) %>% 
   dplyr::select(pubchem_cid, concept_id, category_manual) %>% 
-  dplyr::left_join(overlap.df)
+  dplyr::left_join(conflict.df)
 
-ggplot(overlap.gold.df, aes(n_labels_se, n_labels_ind)) +
+ggplot(conflict.gold.df, aes(n_labels_se, n_labels_ind)) +
   geom_abline(intercept = 0, slope = 1, linetype='dashed', color='grey') +
   geom_point(aes(color=category_manual, size=total_labels), alpha = 0.6) +
   theme_bw() + coord_fixed() +
@@ -223,7 +234,11 @@ ggplot(overlap.gold.df, aes(n_labels_se, n_labels_ind)) +
   xlab('Side Effect Labels') + ylab('Indication Labels')
 ```
 
-Manual classification was performed for `r nrow(overlap.gold.df)` side effect-indication conflicts. The prevalance of indications in this gold standard dataset was `r (mean(overlap.gold.df$category_manual == 'indication') * 100) %>% format(digits = 3)`%. 
+Manual classification was performed for `r nrow(conflict.gold.df)` side effect-indication conflicts. The prevalance of indications in this gold standard dataset was `r (mean(conflict.gold.df$category_manual == 'indication') * 100) %>% format(digits = 3)`%. 
+
+### Modeling conflict resolution
+
+Using our descriptors as features, we see how accurately we can predict the actual status of a conflict. We used a [support vector machine](https://en.wikipedia.org/wiki/Support_vector_machine) for classification.
 
 ```{r, fig.height=3.5, fig.cap='SVM Parameter Optimization'}
 GetX <- function(df) {
@@ -232,94 +247,101 @@ GetX <- function(df) {
   return(X)
 }
 
-X.gold <- GetX(overlap.gold.df)
-X.overlap <- GetX(overlap.df)
-y.gold <- overlap.gold.df$category_manual
+X.gold <- GetX(conflict.gold.df)
+X.conflict <- GetX(conflict.df)
+y.gold <- conflict.gold.df$category_manual
 
 set.seed(0)
 control <- caret::trainControl(method = 'repeatedcv', repeats=10, classProb=TRUE)
 tune.grid <- expand.grid(.sigma = kernlab::sigest(x = as.matrix(X.gold), frac = 0.5, scaled = TRUE), .C = 2 ^ (-10:2))
-overlap.model <- caret::train(x = X.gold, y = y.gold, preProcess = c('center', 'scale'), 
+conflict.model <- caret::train(x = X.gold, y = y.gold, preProcess = c('center', 'scale'), 
   method = 'svmRadial', metric = 'Kappa', trControl = control, tuneGrid = tune.grid)
-ggplot(overlap.model) + theme_bw() + 
+ggplot(conflict.model) + theme_bw() + 
   scale_x_log10(breaks = scales::trans_breaks('log2', function(x) 2 ^ x),
                 labels = scales::trans_format('log2', scales::math_format(2 ^ .x)))
 
 
-y.overlap.df <- predict(overlap.model, newdata = X.overlap, type = 'prob')
-overlap.df$prob_ind <- y.overlap.df$indication
-overlap.df$prob_se <- y.overlap.df$side_effect
+y.conflict.df <- predict(conflict.model, newdata = X.conflict, type = 'prob')
+conflict.df$prob_ind <- y.conflict.df$indication
+conflict.df$prob_se <- y.conflict.df$side_effect
 
 # Add category_manual column
-overlap.df <- overlap.df %>% dplyr::left_join(
-  y = overlap.gold.df %>% dplyr::select(pubchem_cid, concept_id, category_manual))
+conflict.df <- conflict.df %>% dplyr::left_join(
+  y = conflict.gold.df %>% dplyr::select(pubchem_cid, concept_id, category_manual))
 
-# Save the overlap.df
-overlap.df %>%
-  write.table(file = file.path('..', 'data', 'overlap.txt'), sep='\t', quote = FALSE, row.names=FALSE, na = '')
+# Save the conflict.df
+conflict.df %>%
+  write.table(file = file.path('..', 'data', 'conflict.txt'), sep='\t', quote = FALSE, row.names=FALSE, na = '')
 
 ```
+
+### Using predictions to resolve conflicts
+
+We used the probabilities generated by our model to resolve conflicts.
 
 ```{r}
 prob_cutoff_ind <- 0.75
 prob_cutoff_se <- 0.75
 stopifnot(prob_cutoff_ind + prob_cutoff_se >= 1)
 
-indication_drop.df <- overlap.df %>%
+indication_drop.df <- conflict.df %>%
   dplyr::filter(prob_ind < prob_cutoff_ind) %>%
   dplyr::mutate(type='indication')
 
-side_effect_drop.df <- overlap.df %>%
+side_effect_drop.df <- conflict.df %>%
   dplyr::filter(prob_se < prob_cutoff_se) %>%
   dplyr::mutate(type='side_effect')
 
 conflict.stats <- list(
-  n_ind = nrow(overlap.df) - nrow(indication_drop.df),
-  n_se = nrow(overlap.df) - nrow(side_effect_drop.df),
-  n_unresolved = nrow(indication_drop.df) + nrow(side_effect_drop.df) - nrow(overlap.df)
+  n_ind = nrow(conflict.df) - nrow(indication_drop.df),
+  n_se = nrow(conflict.df) - nrow(side_effect_drop.df),
+  n_unresolved = nrow(indication_drop.df) + nrow(side_effect_drop.df) - nrow(conflict.df)
 )
 
-non_overlap.df <- collapsed.df %>%
+non_conflict.df <- collapsed.df %>%
   dplyr::anti_join(y = indication_drop.df, by = c('pubchem_cid', 'concept_id', 'type')) %>%
   dplyr::anti_join(y = side_effect_drop.df, by = c('pubchem_cid', 'concept_id', 'type'))
 
 # set.seed(0)
-# non_overlap.df %>% dplyr::filter(type == 'indication') %>% dplyr::sample_frac(1) %>%
+# non_conflict.df %>% dplyr::filter(type == 'indication') %>% dplyr::sample_frac(1) %>%
 #   write.delim(file = file.path('..', 'data', 'indications.txt'))
-# non_overlap.df %>% dplyr::filter(type == 'side_effect') %>% dplyr::sample_frac(1) %>%
+# non_conflict.df %>% dplyr::filter(type == 'side_effect') %>% dplyr::sample_frac(1) %>%
 #   write.delim(file = file.path('..', 'data', 'side_effects.txt'))
-non_overlap.df %>% 
+non_conflict.df %>% 
   write.delim(file.path('..', 'data', 'sider2-processed.txt'))
 ```
 
 Conflicting compound-concept pairs were classified as indications if $Prob(Indication) \geq `r prob_cutoff_ind`$ and as side effects if $Prob(Side Effect) \geq `r prob_cutoff_se`$. Of the conflicts, `r conflict.stats$n_ind` were classified as indications, `r conflict.stats$n_se` were classified as side effects, and `r conflict.stats$n_unresolved` were unresolved and excluded as both indications and side effects.
 
 ```{r, echo=FALSE}
-se.df <- non_overlap.df %>% dplyr::filter(type == 'side_effect')
-ind.df <- non_overlap.df %>% dplyr::filter(type == 'indication')
+se.df <- non_conflict.df %>% dplyr::filter(type == 'side_effect')
+ind.df <- non_conflict.df %>% dplyr::filter(type == 'indication')
 ```
 
 After resolving conflicts, `r nrow(se.df)` side effects remained covering `r dplyr::n_distinct(se.df$pubchem_cid)` compounds and `r dplyr::n_distinct(se.df$concept_id)` side effects. Conversely, `r nrow(ind.df)` indications remained for `r dplyr::n_distinct(ind.df$pubchem_cid)` compounds and `r dplyr::n_distinct(ind.df$concept_id)` diseases.
 
-### Read manual indication and side-effect classifications
+### Side effect and Indication Gold Standards
+
+Next, we manually classified a random subset of indications as true or false.
+
 ```{r}
-non_overlap.df <- non_overlap.df %>%
+non_conflict.df <- non_conflict.df %>%
   dplyr::inner_join(
-    non_overlap.df %>% dplyr::group_by(concept_id) %>%
+    non_conflict.df %>% dplyr::group_by(concept_id) %>%
     dplyr::summarize(concept_n_ind = sum(type == 'indication'),
                      concept_n_se = sum(type == 'side_effect'))) %>% 
   dplyr::inner_join(
-    non_overlap.df %>% dplyr::group_by(pubchem_cid) %>%
+    non_conflict.df %>% dplyr::group_by(pubchem_cid) %>%
     dplyr::summarize(compound_n_ind = sum(type == 'indication'),
                      compound_n_se = sum(type == 'side_effect')))
 
 gold.ind.df <- file.path('..', 'gold', 'indications.txt') %>% 
   read.delim(na.strings = '', colClasses=c(category_manual='factor')) %>% 
-  dplyr::left_join(non_overlap.df)
+  dplyr::left_join(non_conflict.df)
   
 gold.se.df <- file.path('..', 'gold', 'side_effects.txt') %>% 
   read.delim(na.strings = '', colClasses=c(category_manual='factor')) %>% 
-  dplyr::left_join(non_overlap.df)
+  dplyr::left_join(non_conflict.df)
 
 prop.test.ind <- sum(gold.ind.df$category_manual == 1) %>% prop.test(n = nrow(gold.ind.df))
 prop.test.se <- sum(gold.se.df$category_manual == 1) %>% prop.test(n = nrow(gold.se.df))
@@ -335,7 +357,8 @@ prec.stats <- list(
 
 We manually evaluated `r nrow(gold.ind.df)` random indications and `r nrow(gold.se.df)` random side effects to assess the precision of automated side effect and indication extraction. The precision of indications was `r prec.stats$ind.prec.est`% [95% CI: `r prec.stats$ind.prec.lower`--`r prec.stats$ind.prec.upper`%]. The precision of side effects was `r prec.stats$se.prec.est`% [95% CI: `r prec.stats$se.prec.lower`--`r prec.stats$se.prec.upper`%]
 
-### Can we predict which indications are false positives
+### Can we predict which indications are false positives?
+
 ```{r}
 X.gold <- GetX(gold.se.df)
 y.gold <- as.factor(gold.se.df$category_manual)
@@ -351,9 +374,10 @@ ggplot(ind.model) + theme_bw() + ylim(c(-0.01, 0.1)) +
 ```
 
 ### Vizualizing Side Effects and Indications
+
 ```{r}
 # vizualizing pairs
-non_overlap.df %>%
+non_conflict.df %>%
   ggplot(aes(x = as.character(pubchem_cid), y = concept_id)) + theme_bw() +
     facet_grid(type ~ ., scales = 'free_y', space = 'free_y') +
     geom_tile(fill= 'black') +
@@ -365,7 +389,7 @@ non_overlap.df %>%
 
 ```{r}
 # Display as a javascript datatable
-non_overlap.df %>%
+non_conflict.df %>%
   dplyr::select(pubchem_cid:concept_name, n_labels, total_labels, type) %>%
   PubchemDataTable(max.rows=200)
 ```
@@ -373,12 +397,11 @@ non_overlap.df %>%
 ### Multiple Sclerosis Indications
 
 ```{r}
-non_overlap.df %>%
+non_conflict.df %>%
   dplyr::select(pubchem_cid:concept_name, n_labels, total_labels, type) %>%
   dplyr::filter(concept_name == 'multiple sclerosis') %>%
   PubchemDataTable()
 ```
-
 
 # References
 ```{r, include=FALSE}

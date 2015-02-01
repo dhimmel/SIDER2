@@ -31,7 +31,13 @@ knitcitations::cleanbib()
 knitcitations::cite_options(citation_format = 'pandoc', cite.style = 'authoryear', hyperlink = 'to.bib', super = TRUE)
 ```
 
-Here we show how to compute the side effect similarity of two drugs. We will be using a similar technique to a previous study which used side effect similarity to uncover new drug-target relationships `r knitcitations::citep('10.1126/science.1158140')`.
+Here, we compute the pairwise similarities between compounds. We compute drug-drug similarities separately based on three different types of information:
+
++ side effects
++ indications
++ substructure
+
+The method for calculating side effect and indication similarity is based on the method from a previous analysis `r knitcitations::citep('10.1126/science.1158140')`. Substructure similarity is calculated externally using [PubChem](https://pubchem.ncbi.nlm.nih.gov/score_matrix/score_matrix-help.html).
 
 ### Load packages
 
@@ -74,12 +80,16 @@ PubchemDataTable <- function(df, ...) {
 }
 ```
 
-### Chemical Similarity
+### Substructure Similarity
 We use PubChem's [score matrix](http://pubchem.ncbi.nlm.nih.gov/score_matrix) service. We use the [2D substructure search](https://pubchem.ncbi.nlm.nih.gov/score_matrix/score_matrix-help.html):
 
 > 2D Similarity: Substructure key-based 2D Tanimoto similarity. Scores are in the range [0 .. 100].
 
-Under `ID List`, select *Upload a file with IDs...* and choose `sider_compounds_pubchem.txt`. Select `Id-Id Score` for output format and `gzip`for compression.
+PubChem provides [additional explanation](https://pubchem.ncbi.nlm.nih.gov/help.html#tanimoto) of the keys used to describe substructure:
+
+> There are 881 substructure-keys (skeys) in each fingerprint. Each bit in the fingerprint represents the presence (or absence) of a particular chemical substructure (e.g., a carboxylic acid) or a particular count of the same. These skeys are similar in nature to the well-known MDL MACCS skeys fingerprints.
+
+To perform the search, we selected *Upload a file with IDs...* under `ID List` and choose `sider_compounds_pubchem.txt`. We selected `Id-Id Score` for output format and `gzip`for compression.
 
 ```{r}
 structure.df <- file.path('..', 'data', 'pubchem_score_matrix_2d.tab.gz') %>%
@@ -89,9 +99,9 @@ structure.df <- file.path('..', 'data', 'pubchem_score_matrix_2d.tab.gz') %>%
 
 ```
 
-### Read data
+### Read Processed SIDER 2 Data
 
-We begin with the processed data from the [SIDER 2 resource](http://sideeffects.embl.de/) `r knitcitations::citep('10.1038/msb.2009.98')`.
+[Previousely](../parse), we processed data from the from the [SIDER 2 resource](http://sideeffects.embl.de/) `r knitcitations::citep('10.1038/msb.2009.98')`. Here, we read the data and convert from a pairwise format to a binary matrix.
 
 ```{r}
 sider.df <- file.path('..', 'data', 'sider2-processed.txt') %>% read.delim(na.strings='')
@@ -103,8 +113,11 @@ ind.mat <- xtabs(formula = ~ pubchem_cid + concept_id ,
   data = dplyr::filter(sider.df, type == 'indication')) %>% as.matrix()
 ```
 
+## Compute Side Effect and Indication Similarity
 
-### Compute concept rarity weights
+We adopted a similarity metric that assesses the extent of concept (either side effect or indication) overlap between two compounds. The method weights concepts based on their rarity (relating to few compounds) and underrepresentation (dissimilarity compared to other concetps).
+
+### Rarity Weighting
 
 Rarity weighting was performed as [previousely described](http://www.sciencemag.org/content/suppl/2008/07/10/321.5886.263.DC1/Campillos.SOM.pdf) `r knitcitations::citep('10.1126/science.1158140')`:
 
@@ -122,7 +135,7 @@ dplyr::bind_rows(
   geom_histogram()
 ```
 
-### Compute concept underrepresentation weights
+### Underrepresentation Weighting
 
 Underrepresentation weighting was also performed as [previousely described](http://www.sciencemag.org/content/suppl/2008/07/10/321.5886.263.DC1/Campillos.SOM.pdf) `r knitcitations::citep('10.1126/science.1158140')`, except that Ward's method `r knitcitations::citep('10.2307/2282967')` was used for heirarchical clustering:
 
@@ -189,9 +202,9 @@ dplyr::bind_rows(
   geom_histogram()
 ```
 
-### Compute Side Effect/Indication Similarity
+### Computing Compound-Compound Similarity
 
-Next, we compute weighted [Jaccard index](https://en.wikipedia.org/wiki/Jaccard_index) for compound pairs. This number between 0 and 1 measures the similarity between two side effect/indication profiles. 
+Next, we computed a weighted [Jaccard index](https://en.wikipedia.org/wiki/Jaccard_index) for each compound pair. This number, between 0 and 1, measures the similarity between two side effect/indication profiles. 
 
 ```{r}
 SiderSimilarity <- function(x1, x2, w) {
@@ -222,8 +235,10 @@ similarity.df <- dplyr::full_join(
 gz <- file.path('..', 'data', 'similarities.txt.gz') %>% gzfile('w')
 similarity.df %>% write.delim(gz); close(gz)
 gz <- file.path('..', 'data', 'similarities-complete.txt.gz') %>% gzfile('w')
-similarity.df %>% na.omit() %T>% PubchemDataTable(max.rows=200) %>% write.delim(gz); close(gz)
+similarity.df %>% na.omit() %T>% write.delim(gz) %>% PubchemDataTable(max.rows=200); close(gz)
 ```
+
+### Similarity Distributions
 
 Next, we evaluate the distirubtion of compound-compound similarities. Taking the squareroot of similarities provides a zero-inflated but otherwise normal-looking distribution.
 
@@ -255,7 +270,7 @@ similarity.df %>% na.omit() %>%
     xlab('Side Effect Similarity') + ylab('Indication Similarity')
 ```
 
-Finally, we fit a linear regression to assess the strength of the association. The association is positive, but has a small effect size. The great significance occurs despite the small effect size since there are close to one million observations.
+Finally, we fit a linear regression to assess the strength of the association. The association is positive, but has a small effect size. The great significance occurs despite the small effect size, since there are close to one million observations.
 
 ```{r}
 similarity.df %$% lm(sqrt(indication) ~ sqrt(side_effect)) %>% summary()
