@@ -1,0 +1,46 @@
+---
+title: "SIDER 2"
+author: "Daniel Himmelstein"
+date: "January 30, 2015"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+    includes:
+      in_header: include/in_header.html
+      before_body: include/before_body.html
+      after_body: include/after_body.html
+bibliography: references.bib
+csl: cite-styles/plos-mod.csl
+---
+
+```{r, include=FALSE}
+# Set up citation management
+library(knitcitations)
+knitcitations::cleanbib()
+knitcitations::cite_options(citation_format = 'pandoc', cite.style = 'authoryear', hyperlink = 'to.bib', super = TRUE)
+```
+
+This website documents parsing [SIDER 2](http://sideeffects.embl.de) `r knitcitations::citep('10.1038/msb.2009.98')`, which is a database of indications and side effects extracted from drug labels. Using a similar method to an existing analysis `r knitcitations::citep('10.1126/science.1158140')`, we compute similarity measures between compounds.
+
+## Components:
+
++ [**Parse**](parse) in *R* -- reading, manipulating, and performing quality control on the raw SIDER 2 data
++ [**Similarity**](similarity) in *R* -- calculating pairwise similarities between compounds based on their side effect and indication profiles
++ [**Compounds**](compounds) in *python* -- querying PubChem for additional compound information
+
+## Downloads:
+
+The [project repository](https://github.com/dhimmel/SIDER2) contains all files and code used for this project.
+
+Several tab delimited text files are provided here for download:
+
++ [All side effects and indications, after processing](data/sider2-processed.txt). Each row represents an associated compound-concept pair.
++ [Pairwise compound similarities](data/similarities.txt.gz) for the three different similarity methods (based on indications, side effects, and substructure). The subset of compound-pairs that had values for all three methods is [also available](data/similarities-complete.txt.gz).
++ [Compound information](data/compounds.txt) including canonical smiles and parents.
+
+# References
+
+```{r, include=FALSE}
+knitcitations::write.bibtex(file = 'references.bib')
+```
