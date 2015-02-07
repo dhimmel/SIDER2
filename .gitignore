@@ -1,4 +1,8 @@
-similarity/cytoscape/animation.cys
+# Cytoscape session files
+similarity/cytoscape/sessions/
+
+# Animation frames
+similarity/cytoscape/*/frames/
 
 # Created by https://www.gitignore.io
 
