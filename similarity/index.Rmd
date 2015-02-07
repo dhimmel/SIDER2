@@ -299,11 +299,22 @@ similarity.df %$% lm(sqrt(side_effect) ~ sqrt(substructure)) %>% summary()
 similarity.df %$% lm(sqrt(indication) ~ sqrt(substructure) + sqrt(side_effect)) %>% summary()
 ```
 
-## Network Visualization
+## Network Animation
 
-Similarity networks were created using [Cytoscape](http://www.cytoscape.org/) `r knitcitations::citep('10.1101/gr.1239303')`. For each of the three networks, modules of similar compounds were constructed using [MCL Clustering](http://micans.org/mcl/) from the [*clusterMaker2* app](http://apps.cytoscape.org/apps/clusterMaker2) `r knitcitations::citep('10.1186/1471-2105-12-436')`. Structures, rendered from each compound's SMILES, were superimposed onto the nodes using the [*chemViz2* app](http://apps.cytoscape.org/apps/chemviz2), although these diagrams are difficult to see in the video. The [*CyAnimator* app](http://apps.cytoscape.org/apps/cyanimator) illustrates the transition from substructure similarity modules to indication similarity modules. The compounds from the largest structural similarity module are colored red. When compounds organized into indication similarity modules, the red nodes cosegregated indicating concordance between indication and structural similarity.
+Similarity networks were created using [Cytoscape](http://www.cytoscape.org/) `r knitcitations::citep('10.1101/gr.1239303')`. For each of the three networks, modules of similar compounds were constructed using [MCL Clustering](http://micans.org/mcl/) from the [*clusterMaker2* app](http://apps.cytoscape.org/apps/clusterMaker2) `r knitcitations::citep('10.1186/1471-2105-12-436')`. Structures, rendered from each compound's SMILES, were superimposed onto the nodes using the [*chemViz2* app](http://apps.cytoscape.org/apps/chemviz2), although these diagrams are difficult to see in the video. 
 
-<div align="center" class="embed-responsive embed-responsive-4by3"><video controls class="embed-responsive-item"><source src=cytoscape/animation.mp4 type=video/mp4></video></div>
+### Substructure &rarr; Indication
+
+The [*CyAnimator* app](http://apps.cytoscape.org/apps/cyanimator) illustrates the transition from substructure similarity modules to indication similarity modules. The compounds from the largest structural similarity module are colored red. When compounds organized into indication similarity modules, the red nodes cosegregated indicating concordance between indication and structural similarity.
+
+<div align="center" class="embed-responsive embed-responsive-16by9"><video controls class="embed-responsive-item"><source src=cytoscape/substructure-indication/animation.mp4 type=video/mp4></video></div>
+
+### Substructure &rarr; Side Effect
+
+We repeat the animation showing the transition from substructure to side effect similarity.
+
+<div align="center" class="embed-responsive embed-responsive-16by9"><video controls class="embed-responsive-item"><source src=cytoscape/substructure-side_effect/animation.mp4 type=video/mp4></video></div>
+
 
 # References
 ```{r, include=FALSE}
