@@ -1,7 +1,7 @@
 ---
 title: "SIDER 2 Pairwise Similarity"
-author: "Daniel Himmelstein, Leo Brueggeman, Sergio Baranzini"
-date: "February 3, 2015"
+author: "Daniel Himmelstein, Alexander Pico, Sergio Baranzini"
+date: "February 6, 2015"
 output:
   html_document:
     theme: cosmo
@@ -298,6 +298,12 @@ similarity.df %$% lm(sqrt(side_effect) ~ sqrt(substructure)) %>% summary()
 # Predict indication similarity using substructure and side effect similarity
 similarity.df %$% lm(sqrt(indication) ~ sqrt(substructure) + sqrt(side_effect)) %>% summary()
 ```
+
+## Network Visualization
+
+Similarity networks were created using [Cytoscape](http://www.cytoscape.org/). For each of the three networks, modules of similar compounds were constructed using [MCL Clustering](http://micans.org/mcl/) from the [clusterMaker2 app](http://apps.cytoscape.org/apps/clusterMaker2). Structures, rendered from each compound's SMILES, were superimposed onto the nodes using the [chemViz2 app](http://apps.cytoscape.org/apps/chemviz2), although these diagrams are difficult to see in the video. The [CyAnimator app](http://apps.cytoscape.org/apps/cyanimator) illustrates the transition from substructure similarity modules to side effect similarity modules. The compounds from the largest structural similarity module are colored red. When compounds organized into side effect similarity modules, the red nodes cosegregated indicating concordance between side effect and structural similarity.
+
+<div align="center" class="embed-responsive embed-responsive-4by3"><video controls class="embed-responsive-item"><source src=cytoscape/animation.mp4 type=video/mp4></video></div>
 
 # References
 ```{r, include=FALSE}
